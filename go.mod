@@ -1,6 +1,6 @@
 module github.com/rudderlabs/compose-test
 
-go 1.19
+go 1.18
 
 require github.com/jackc/pgx/v5 v5.0.1
 
