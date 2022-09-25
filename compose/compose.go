@@ -14,6 +14,16 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+var letters = []rune("abcdefghijklmnopqrstuvwxyz")
+
+func randSeq(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
 type TestingCompose struct {
 	compose *Compose
 	t       testing.TB
@@ -25,23 +35,13 @@ type Compose struct {
 	paths []string
 }
 
-var letters = []rune("abcdefghijklmnopqrstuvwxyz")
-
-func randSeq(n int) string {
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
-	}
-	return string(b)
-}
-
-type ContainerInfo struct {
+type containerInfo struct {
 	Service    string
-	Publishers []Publisher
+	Publishers []publisher
 }
 
 // Publishers":[{"URL":"","TargetPort":8123,"PublishedPort":0,"Protocol":"tcp"}
-type Publisher struct {
+type publisher struct {
 	Protocol      string
 	URL           string
 	TargetPort    int
@@ -172,7 +172,7 @@ func (c *Compose) extractPorts(ctx context.Context) error {
 	return nil
 }
 
-func (c *Compose) ps(ctx context.Context) ([]ContainerInfo, error) {
+func (c *Compose) ps(ctx context.Context) ([]containerInfo, error) {
 	cmd := exec.CommandContext(ctx, "docker",
 		"compose",
 		"-p", c.name,
