@@ -78,7 +78,6 @@ func (c *Compose) Stop(ctx context.Context) error {
 		"--volumes",
 	)
 	o, err := cmd.CombinedOutput()
-
 	if err != nil {
 		fmt.Println(string(o))
 		return fmt.Errorf("docker compose down: %w", err)
@@ -108,7 +107,6 @@ func (c *Compose) Start(ctx context.Context) error {
 
 	cmd := exec.CommandContext(ctx, "docker", args...)
 	o, err := cmd.CombinedOutput()
-
 	if err != nil {
 		fmt.Println(args)
 		fmt.Println(string(o))
@@ -186,7 +184,7 @@ func (c *Compose) ps(ctx context.Context) ([]containerInfo, error) {
 		return nil, fmt.Errorf("docker compose ps: %w", err)
 	}
 
-	var info []ContainerInfo
+	var info []containerInfo
 	err = json.Unmarshal(o, &info)
 	if err != nil {
 		return nil, err

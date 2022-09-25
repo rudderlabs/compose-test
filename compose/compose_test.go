@@ -46,10 +46,9 @@ func TestCompose(t *testing.T) {
 
 		_, err = conn.Exec(context.Background(), "CREATE TABLE test (id int)")
 		require.NoError(t, err)
-
 	})
-
 }
+
 func TestComposeTesting(t *testing.T) {
 	t.Parallel()
 
@@ -79,7 +78,5 @@ func TestComposeTesting(t *testing.T) {
 
 		_, err = conn.Exec(context.Background(), "CREATE TABLE test (id int)")
 		require.NoError(t, err)
-
 	})
-
 }
