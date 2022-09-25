@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jackc/pgx/v5"
+	pgx "github.com/jackc/pgx/v5"
 	"github.com/rudderlabs/compose-test/compose"
 	"github.com/stretchr/testify/require"
 )
