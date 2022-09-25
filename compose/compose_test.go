@@ -11,6 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const startTimeout = 2 * time.Minute
+
 func TestCompose(t *testing.T) {
 	t.Parallel()
 
@@ -19,7 +21,7 @@ func TestCompose(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), startTimeout)
 	defer cancel()
 
 	t.Cleanup(func() {
@@ -54,7 +56,7 @@ func TestComposeTesting(t *testing.T) {
 
 	c := compose.OpenTesting(t, "./testdata/docker-compose.test.yml")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), startTimeout)
 	defer cancel()
 
 	t.Cleanup(func() {
