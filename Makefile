@@ -12,6 +12,7 @@ help: ## Show the available commands
 .PHONY: install-tools
 install-tools:
 	go install mvdan.cc/gofumpt@latest
+	go install golang.org/x/vuln/cmd/govulncheck@latest
 
 .PHONY: lint
 lint: fmt
@@ -20,5 +21,6 @@ lint: fmt
 
 .PHONY: fmt
 fmt: install-tools
+	govulncheck ./...
 	gofumpt -l -w -extra  .
 
