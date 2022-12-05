@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os/exec"
+	"strings"
 	"testing"
 	"time"
 )
@@ -30,14 +31,23 @@ type TestingCompose struct {
 }
 
 type Compose struct {
-	ports map[string]map[int]int
+	ports  map[string]map[int]int
+	env    map[string]map[string]string
+	labels map[string]string
+
 	name  string
 	paths []string
 }
 
 type containerInfo struct {
+	ID         string
 	Service    string
 	Publishers []publisher
+}
+
+type containerConfig struct {
+	Env    []string          `json:"Env"`
+	Labels map[string]string `json:"Labels"`
 }
 
 // Publishers":[{"URL":"","TargetPort":8123,"PublishedPort":0,"Protocol":"tcp"}
@@ -113,7 +123,7 @@ func (c *Compose) Start(ctx context.Context) error {
 		return fmt.Errorf("docker compose up: %w", err)
 	}
 
-	err = c.extractPorts(ctx)
+	err = c.extractServiceInfo(ctx)
 	if err != nil {
 		return err
 	}
@@ -126,6 +136,10 @@ func (tc *TestingCompose) Start(ctx context.Context) {
 	if err != nil {
 		tc.t.Fatalf("compose library start: %v", err)
 	}
+
+	tc.t.Cleanup(func() {
+		tc.Stop(context.Background())
+	})
 }
 
 func (c *Compose) Port(service string, port int) (int, error) {
@@ -151,23 +165,79 @@ func (tc *TestingCompose) Port(service string, port int) int {
 	return p
 }
 
-func (c *Compose) extractPorts(ctx context.Context) error {
-	info, err := c.ps(ctx)
+func (c *Compose) extractServiceInfo(ctx context.Context) error {
+	psInfo, err := c.ps(ctx)
 	if err != nil {
 		return err
 	}
 
 	c.ports = make(map[string]map[int]int)
 
-	for _, i := range info {
+	ids := make([]string, len(psInfo))
+	for i, info := range psInfo {
 		p := make(map[int]int)
-		for _, pub := range i.Publishers {
+		for _, pub := range info.Publishers {
 			p[pub.TargetPort] = pub.PublishedPort
 		}
-		c.ports[i.Service] = p
+		c.ports[info.Service] = p
+		ids[i] = info.ID
+	}
+
+	configs, err := c.config(ctx, ids...)
+	if err != nil {
+		return err
+	}
+
+	c.env = make(map[string]map[string]string)
+
+	for i, config := range configs {
+		c.env[psInfo[i].Service] = make(map[string]string)
+		for _, env := range config.Env {
+			s := strings.SplitN(env, "=", 2)
+			c.env[psInfo[i].Service][s[0]] = s[1]
+		}
+
+		for _, label := range config.Labels {
+			if strings.HasPrefix(label, "compose-test-expose") {
+				s := strings.SplitN(
+					strings.TrimPrefix(label, "compose-test-expose"),
+					"=",
+					2,
+				)
+				c.labels[s[0]] = s[1]
+			}
+		}
+
 	}
 
 	return nil
+}
+
+func (c *Compose) config(ctx context.Context, id ...string) ([]containerConfig, error) {
+	args := []string{
+		"inspect",
+		"--format={{json .Config}}",
+	}
+	args = append(args, id...)
+
+	cmd := exec.CommandContext(ctx, "docker", args...)
+	o, err := cmd.CombinedOutput()
+	if err != nil {
+		fmt.Println(string(o))
+		return nil, fmt.Errorf("docker compose ps: %w: %s", err, o)
+	}
+
+	lines := strings.Split(strings.TrimSpace(string(o)), "\n")
+
+	configs := make([]containerConfig, len(lines))
+	for i, l := range lines {
+		err = json.Unmarshal([]byte(l), &configs[i])
+		if err != nil {
+			return nil, fmt.Errorf("unmarshal: %w", err)
+		}
+	}
+
+	return configs, nil
 }
 
 func (c *Compose) ps(ctx context.Context) ([]containerInfo, error) {
