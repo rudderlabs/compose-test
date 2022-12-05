@@ -51,7 +51,7 @@ func (tc *TestingCompose) Port(service string, port int) int {
 	return p
 }
 
-func (tc *TestingCompose) Env(service string, name string) string {
+func (tc *TestingCompose) Env(service, name string) string {
 	v, err := tc.compose.Env(service, name)
 	if err != nil {
 		tc.t.Fatalf("compose library port: %v", err)

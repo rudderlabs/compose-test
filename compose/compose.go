@@ -55,7 +55,7 @@ type publisher struct {
 
 func New(paths ...string) (*Compose, error) {
 	return &Compose{
-		name:  "test_" + randSeq(6),
+		name:  "test_" + randSeq(20),
 		paths: paths,
 	}, nil
 }
@@ -70,8 +70,9 @@ func (c *Compose) Stop(ctx context.Context) error {
 		"--rmi", "local",
 		"--volumes",
 	)
-	_, err := cmd.CombinedOutput()
+	o, err := cmd.CombinedOutput()
 	if err != nil {
+		fmt.Fprintln(os.Stderr, string(o))
 		return fmt.Errorf("docker compose down: %w", err)
 	}
 
@@ -119,7 +120,7 @@ func (c *Compose) Port(service string, port int) (int, error) {
 	return p, nil
 }
 
-func (c *Compose) Env(service string, name string) (string, error) {
+func (c *Compose) Env(service, name string) (string, error) {
 	kv, ok := c.env[service]
 	if !ok {
 		return "", fmt.Errorf("no service %q found", service)
@@ -189,6 +190,7 @@ func (c *Compose) config(ctx context.Context, id ...string) ([]containerConfig, 
 	args = append(args, id...)
 
 	cmd := exec.CommandContext(ctx, "docker", args...)
+	cmd.Env = os.Environ() // TODO: remove this
 	o, err := cmd.CombinedOutput()
 	if err != nil {
 		return nil, fmt.Errorf("docker compose ps: %w: %s", err, o)
