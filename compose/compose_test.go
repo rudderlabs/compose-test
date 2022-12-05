@@ -24,12 +24,6 @@ func TestCompose(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), startTimeout)
 	defer cancel()
 
-	t.Cleanup(func() {
-		if err := c.Stop(context.Background()); err != nil {
-			t.Fatal(err)
-		}
-	})
-
 	require.NoError(t, c.Start(ctx))
 
 	t.Run("test postgres", func(t *testing.T) {
@@ -58,10 +52,6 @@ func TestComposeTesting(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), startTimeout)
 	defer cancel()
-
-	t.Cleanup(func() {
-		c.Stop(context.Background())
-	})
 
 	c.Start(ctx)
 

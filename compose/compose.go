@@ -87,9 +87,8 @@ func (c *Compose) Stop(ctx context.Context) error {
 		"--rmi", "local",
 		"--volumes",
 	)
-	o, err := cmd.CombinedOutput()
+	_, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Println(string(o))
 		return fmt.Errorf("docker compose down: %w", err)
 	}
 
@@ -116,10 +115,8 @@ func (c *Compose) Start(ctx context.Context) error {
 	args = append(args, "up", "--detach", "--wait")
 
 	cmd := exec.CommandContext(ctx, "docker", args...)
-	o, err := cmd.CombinedOutput()
+	_, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Println(args)
-		fmt.Println(string(o))
 		return fmt.Errorf("docker compose up: %w", err)
 	}
 
@@ -223,7 +220,6 @@ func (c *Compose) config(ctx context.Context, id ...string) ([]containerConfig, 
 	cmd := exec.CommandContext(ctx, "docker", args...)
 	o, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Println(string(o))
 		return nil, fmt.Errorf("docker compose ps: %w: %s", err, o)
 	}
 
@@ -250,7 +246,6 @@ func (c *Compose) ps(ctx context.Context) ([]containerInfo, error) {
 	)
 	o, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Println(string(o))
 		return nil, fmt.Errorf("docker compose ps: %w", err)
 	}
 
