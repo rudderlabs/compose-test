@@ -16,10 +16,14 @@ const startTimeout = 2 * time.Minute
 func TestCompose(t *testing.T) {
 	t.Parallel()
 
-	c, err := compose.Open("./testdata/docker-compose.test.yml")
+	c, err := compose.New("./testdata/docker-compose.test.yml")
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	t.Cleanup(func() {
+		require.NoError(t, c.Stop(context.Background()))
+	})
 
 	ctx, cancel := context.WithTimeout(context.Background(), startTimeout)
 	defer cancel()
@@ -29,40 +33,24 @@ func TestCompose(t *testing.T) {
 	t.Run("test postgres", func(t *testing.T) {
 		t.Parallel()
 
-		p, err := c.Port("wh-jobsDb", 5432)
+		p, err := c.Port("postgresDB", 5432)
 		require.NoError(t, err)
 		require.NotEqual(t, 5432, p)
 		require.NotEqual(t, 0, p)
 
-		dbURL := fmt.Sprintf("postgres://rudder:password@localhost:%d/postgres?sslmode=disable", p)
-
-		conn, err := pgx.Connect(context.Background(), dbURL)
+		dbName, err := c.Env("postgresDB", "POSTGRES_DB")
 		require.NoError(t, err)
-		defer conn.Close(context.Background())
+		require.Equal(t, "jobsdb", dbName)
 
-		_, err = conn.Exec(context.Background(), "CREATE TABLE test (id int)")
+		pass, err := c.Env("postgresDB", "POSTGRES_PASSWORD")
 		require.NoError(t, err)
-	})
-}
+		require.Equal(t, "password", pass)
 
-func TestComposeTesting(t *testing.T) {
-	t.Parallel()
+		user, err := c.Env("postgresDB", "POSTGRES_USER")
+		require.NoError(t, err)
+		require.Equal(t, "rudder", user)
 
-	c := compose.OpenTesting(t, "./testdata/docker-compose.test.yml")
-
-	ctx, cancel := context.WithTimeout(context.Background(), startTimeout)
-	defer cancel()
-
-	c.Start(ctx)
-
-	t.Run("test postgres", func(t *testing.T) {
-		t.Parallel()
-
-		p := c.Port("wh-jobsDb", 5432)
-		require.NotEqual(t, 5432, p)
-		require.NotEqual(t, 0, p)
-
-		dbURL := fmt.Sprintf("postgres://rudder:password@localhost:%d/postgres?sslmode=disable", p)
+		dbURL := fmt.Sprintf("postgres://%s:%s@localhost:%d/%s?sslmode=disable", user, pass, p, dbName)
 
 		conn, err := pgx.Connect(context.Background(), dbURL)
 		require.NoError(t, err)

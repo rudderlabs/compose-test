@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"os"
 	"os/exec"
 	"strings"
-	"testing"
 	"time"
 )
 
@@ -23,11 +23,6 @@ func randSeq(n int) string {
 		b[i] = letters[rand.Intn(len(letters))]
 	}
 	return string(b)
-}
-
-type TestingCompose struct {
-	compose *Compose
-	t       testing.TB
 }
 
 type Compose struct {
@@ -58,23 +53,11 @@ type publisher struct {
 	PublishedPort int
 }
 
-func Open(paths ...string) (*Compose, error) {
+func New(paths ...string) (*Compose, error) {
 	return &Compose{
 		name:  "test_" + randSeq(6),
 		paths: paths,
 	}, nil
-}
-
-func OpenTesting(t testing.TB, paths ...string) *TestingCompose {
-	c, err := Open(paths...)
-	if err != nil {
-		t.Fatalf("open compose: %v", err)
-	}
-
-	return &TestingCompose{
-		compose: c,
-		t:       t,
-	}
 }
 
 func (c *Compose) Stop(ctx context.Context) error {
@@ -95,13 +78,6 @@ func (c *Compose) Stop(ctx context.Context) error {
 	return nil
 }
 
-func (tc *TestingCompose) Stop(ctx context.Context) {
-	err := tc.compose.Stop(ctx)
-	if err != nil {
-		tc.t.Fatalf("compose library stop: %v", err)
-	}
-}
-
 func (c *Compose) Start(ctx context.Context) error {
 	args := []string{
 		"compose",
@@ -115,8 +91,9 @@ func (c *Compose) Start(ctx context.Context) error {
 	args = append(args, "up", "--detach", "--wait")
 
 	cmd := exec.CommandContext(ctx, "docker", args...)
-	_, err := cmd.CombinedOutput()
+	o, err := cmd.CombinedOutput()
 	if err != nil {
+		fmt.Fprintln(os.Stderr, string(o))
 		return fmt.Errorf("docker compose up: %w", err)
 	}
 
@@ -126,17 +103,6 @@ func (c *Compose) Start(ctx context.Context) error {
 	}
 
 	return nil
-}
-
-func (tc *TestingCompose) Start(ctx context.Context) {
-	err := tc.compose.Start(ctx)
-	if err != nil {
-		tc.t.Fatalf("compose library start: %v", err)
-	}
-
-	tc.t.Cleanup(func() {
-		tc.Stop(context.Background())
-	})
 }
 
 func (c *Compose) Port(service string, port int) (int, error) {
@@ -153,13 +119,18 @@ func (c *Compose) Port(service string, port int) (int, error) {
 	return p, nil
 }
 
-func (tc *TestingCompose) Port(service string, port int) int {
-	p, err := tc.compose.Port(service, port)
-	if err != nil {
-		tc.t.Fatalf("compose library port: %v", err)
+func (c *Compose) Env(service string, name string) (string, error) {
+	kv, ok := c.env[service]
+	if !ok {
+		return "", fmt.Errorf("no service %q found", service)
 	}
 
-	return p
+	v, ok := kv[name]
+	if !ok {
+		return "", fmt.Errorf("environment variable %q is not published", name)
+	}
+
+	return v, nil
 }
 
 func (c *Compose) extractServiceInfo(ctx context.Context) error {
