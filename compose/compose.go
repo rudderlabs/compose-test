@@ -26,12 +26,12 @@ func randSeq(n int) string {
 }
 
 type Compose struct {
+	file   File
 	ports  map[string]map[int]int
 	env    map[string]map[string]string
 	labels map[string]string
 
-	name  string
-	paths []string
+	name string
 }
 
 type containerInfo struct {
@@ -53,10 +53,10 @@ type publisher struct {
 	PublishedPort int
 }
 
-func New(paths ...string) (*Compose, error) {
+func New(file File) (*Compose, error) {
 	return &Compose{
-		name:  "test_" + randSeq(20),
-		paths: paths,
+		name: "test_" + randSeq(20),
+		file: file,
 	}, nil
 }
 
@@ -85,17 +85,17 @@ func (c *Compose) Start(ctx context.Context) error {
 		"-p", c.name,
 	}
 
-	for _, path := range c.paths {
-		args = append(args, "-f", path)
-	}
-
-	args = append(args, "up", "--detach", "--wait")
-
 	cmd := exec.CommandContext(ctx, "docker", args...)
+
+	c.file.apply(cmd)
+
+	cmd.Args = append(cmd.Args, "up", "--detach", "--wait")
+
 	o, err := cmd.CombinedOutput()
 	if err != nil {
+		fmt.Fprintln(os.Stderr, cmd.String())
 		fmt.Fprintln(os.Stderr, string(o))
-		return fmt.Errorf("docker compose up: %w", err)
+		return fmt.Errorf("docker compose up: %w: %s", err, string(o))
 	}
 
 	err = c.extractServiceInfo(ctx)

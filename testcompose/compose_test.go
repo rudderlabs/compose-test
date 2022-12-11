@@ -9,6 +9,7 @@ import (
 	pgx "github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
 
+	"github.com/rudderlabs/compose-test/compose"
 	"github.com/rudderlabs/compose-test/testcompose"
 )
 
@@ -17,7 +18,7 @@ const startTimeout = 2 * time.Minute
 func TestComposeTesting(t *testing.T) {
 	t.Parallel()
 
-	c := testcompose.New(t, "../compose/testdata/docker-compose.test.yml")
+	c := testcompose.New(t, compose.FilePath("../compose/testdata/docker-compose.test.yml"))
 
 	ctx, cancel := context.WithTimeout(context.Background(), startTimeout)
 	defer cancel()

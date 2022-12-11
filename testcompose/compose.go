@@ -7,13 +7,17 @@ import (
 	"github.com/rudderlabs/compose-test/compose"
 )
 
+const (
+	DefaultPath = compose.FilePath("./testdata/docker-compose.yml")
+)
+
 type TestingCompose struct {
 	compose *compose.Compose
 	t       testing.TB
 }
 
-func New(t testing.TB, paths ...string) *TestingCompose {
-	c, err := compose.New(paths...)
+func New(t testing.TB, file compose.File) *TestingCompose {
+	c, err := compose.New(file)
 	if err != nil {
 		t.Fatalf("open compose: %v", err)
 	}

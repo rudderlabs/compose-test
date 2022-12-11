@@ -9,27 +9,56 @@ import (
 	pgx "github.com/jackc/pgx/v5"
 	"github.com/rudderlabs/compose-test/compose"
 	"github.com/stretchr/testify/require"
+
+	_ "embed"
 )
 
 const startTimeout = 2 * time.Minute
 
+//go:embed testdata/docker-compose.test.yml
+var dockerCompose []byte
+
 func TestCompose(t *testing.T) {
 	t.Parallel()
 
-	c, err := compose.New("./testdata/docker-compose.test.yml")
-	if err != nil {
-		t.Fatal(err)
-	}
+	t.Run("using file path", func(t *testing.T) {
+		c, err := compose.New(compose.FilePath("./testdata/docker-compose.test.yml"))
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	t.Cleanup(func() {
-		require.NoError(t, c.Stop(context.Background()))
+		t.Cleanup(func() {
+			require.NoError(t, c.Stop(context.Background()))
+		})
+
+		ctx, cancel := context.WithTimeout(context.Background(), startTimeout)
+		defer cancel()
+
+		require.NoError(t, c.Start(ctx))
+
+		sanityTest(t, c)
 	})
 
-	ctx, cancel := context.WithTimeout(context.Background(), startTimeout)
-	defer cancel()
+	t.Run("using file bytes", func(t *testing.T) {
+		c, err := compose.New(compose.FileBytes(dockerCompose))
+		if err != nil {
+			t.Fatal(err)
+		}
 
-	require.NoError(t, c.Start(ctx))
+		t.Cleanup(func() {
+			require.NoError(t, c.Stop(context.Background()))
+		})
 
+		ctx, cancel := context.WithTimeout(context.Background(), startTimeout)
+		defer cancel()
+
+		require.NoError(t, c.Start(ctx))
+
+		sanityTest(t, c)
+	})
+}
+
+func sanityTest(t *testing.T, c *compose.Compose) {
 	t.Run("test postgres", func(t *testing.T) {
 		t.Parallel()
 

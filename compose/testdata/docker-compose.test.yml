@@ -51,15 +51,15 @@ services:
   #     test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
   #     interval: 1s
   #     retries: 25
-  mssql:
-    image: rudderstack/azure-sql-edge:1.0.6
-    environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=reallyStrongPwd123
-      - SA_DB=master
-      - SA_USER=SA
-    ports:
-      - "1433"
+  # mssql:
+  #   image: rudderstack/azure-sql-edge:1.0.6
+  #   environment:
+  #     - ACCEPT_EULA=Y
+  #     - SA_PASSWORD=reallyStrongPwd123
+  #     - SA_DB=master
+  #     - SA_USER=SA
+  #   ports:
+  #     - "1433"
   zookeeper:
     image: zookeeper:3.5
     hostname: clickhouse-zookeeper
