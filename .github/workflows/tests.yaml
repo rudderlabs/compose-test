@@ -1,0 +1,40 @@
+name: Tests
+on:
+  push:
+    branches:
+      - main
+      - "release/*"
+  pull_request:
+jobs:
+  test:
+    name: Test
+    strategy:
+      matrix:
+        go-version: [1.18.x, 1.19.x]
+        os: [ubuntu-latest]
+        # os: [ubuntu-latest, macos-latest, windows-latest] <- missing docker
+
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-go@v3
+      with:
+        go-version: ${{ matrix.go-version }}
+    - uses: actions/cache@v3
+      with:
+        # In order:
+        # * Module download cache
+        # * Build cache (Linux)
+        # * Build cache (Mac)
+        # * Build cache (Windows)
+        path: |
+          ~/go/pkg/mod
+          ~/.cache/go-build
+          ~/Library/Caches/go-build
+          ~\AppData\Local\go-build
+        key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
+    - run: go version
+    - run: go mod download # Not required, used to segregate module download vs test times
+    - run: make test
+    - uses: codecov/codecov-action@v2
+
