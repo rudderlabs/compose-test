@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/rudderlabs/compose-test/compare/v0.1.0...v0.1.1) (2023-05-15)
+
+
+### Miscellaneous
+
+* added filepaths ([#5](https://github.com/rudderlabs/compose-test/issues/5)) ([2e5230c](https://github.com/rudderlabs/compose-test/commit/2e5230ca2121652c2e50a2438993c93f1cd24dd3))
+
 ## 0.1.0 (2023-05-15)
 
 
