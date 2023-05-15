@@ -10,7 +10,7 @@ jobs:
     name: Test
     strategy:
       matrix:
-        go-version: [1.18.x, 1.19.x]
+        go-version: [1.19.x, 1.20.x]
         os: [ubuntu-latest]
         # os: [ubuntu-latest, macos-latest, windows-latest] <- missing docker
 
@@ -36,5 +36,5 @@ jobs:
     - run: go version
     - run: go mod download # Not required, used to segregate module download vs test times
     - run: make test
-    - uses: codecov/codecov-action@v2
+    - uses: codecov/codecov-action@v3
 
