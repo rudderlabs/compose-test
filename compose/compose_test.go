@@ -22,7 +22,7 @@ func TestCompose(t *testing.T) {
 	t.Parallel()
 
 	t.Run("using file path", func(t *testing.T) {
-		c, err := compose.New(compose.FilePath("./testdata/docker-compose.test.yml"))
+		c, err := compose.New(compose.FilePaths([]string{"./testdata/docker-compose.test.yml"}))
 		if err != nil {
 			t.Fatal(err)
 		}

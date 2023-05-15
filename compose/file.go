@@ -9,10 +9,12 @@ type File interface {
 	apply(c *exec.Cmd)
 }
 
-type FilePath string
+type FilePaths []string
 
-func (f FilePath) apply(c *exec.Cmd) {
-	c.Args = append(c.Args, "-f", string(f))
+func (f FilePaths) apply(c *exec.Cmd) {
+	for _, filePath := range f {
+		c.Args = append(c.Args, "-f", filePath)
+	}
 }
 
 type FileBytes []byte

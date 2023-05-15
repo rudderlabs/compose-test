@@ -18,7 +18,7 @@ const startTimeout = 2 * time.Minute
 func TestComposeTesting(t *testing.T) {
 	t.Parallel()
 
-	c := testcompose.New(t, compose.FilePath("../compose/testdata/docker-compose.test.yml"))
+	c := testcompose.New(t, compose.FilePaths([]string{"../compose/testdata/docker-compose.test.yml"}))
 
 	ctx, cancel := context.WithTimeout(context.Background(), startTimeout)
 	defer cancel()

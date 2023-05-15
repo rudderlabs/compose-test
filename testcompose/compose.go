@@ -7,10 +7,6 @@ import (
 	"github.com/rudderlabs/compose-test/compose"
 )
 
-const (
-	DefaultPath = compose.FilePath("./testdata/docker-compose.yml")
-)
-
 type TestingCompose struct {
 	compose *compose.Compose
 	t       testing.TB
