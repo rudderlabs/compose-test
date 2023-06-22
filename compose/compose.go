@@ -27,6 +27,7 @@ func randSeq(n int) string {
 
 type Compose struct {
 	file   File
+	names  map[string]string
 	ports  map[string]map[int]int
 	env    map[string]map[string]string
 	labels map[string]string
@@ -72,8 +73,7 @@ func (c *Compose) Stop(ctx context.Context) error {
 	)
 	o, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, string(o))
-		return fmt.Errorf("docker compose down: %w", err)
+		return fmt.Errorf("docker compose down: %w: %s", err, string(o))
 	}
 
 	return nil
@@ -93,8 +93,6 @@ func (c *Compose) Start(ctx context.Context) error {
 
 	o, err := cmd.CombinedOutput()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, cmd.String())
-		fmt.Fprintln(os.Stderr, string(o))
 		return fmt.Errorf("docker compose up: %w: %s", err, string(o))
 	}
 
@@ -120,6 +118,28 @@ func (c *Compose) Port(service string, port int) (int, error) {
 	return p, nil
 }
 
+func (c *Compose) Exec(ctx context.Context, service string, command ...string) (string, error) {
+	name, ok := c.names[service]
+	if !ok {
+		return "", fmt.Errorf("no service %q found", service)
+	}
+
+	args := []string{
+		"exec",
+		"-t",
+		name,
+	}
+	args = append(args, command...)
+
+	cmd := exec.CommandContext(ctx, "docker", args...)
+	o, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("docker exec: %w: %s", err, string(o))
+	}
+
+	return string(o), nil
+}
+
 func (c *Compose) Env(service, name string) (string, error) {
 	kv, ok := c.env[service]
 	if !ok {
@@ -140,10 +160,13 @@ func (c *Compose) extractServiceInfo(ctx context.Context) error {
 		return err
 	}
 
+	c.names = make(map[string]string)
 	c.ports = make(map[string]map[int]int)
 
 	ids := make([]string, len(psInfo))
 	for i, info := range psInfo {
+		c.names[info.Service] = info.ID
+
 		p := make(map[int]int)
 		for _, pub := range info.Publishers {
 			p[pub.TargetPort] = pub.PublishedPort

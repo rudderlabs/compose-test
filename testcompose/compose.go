@@ -58,6 +58,17 @@ func (tc *TestingCompose) Port(service string, port int) int {
 	return p
 }
 
+func (tc *TestingCompose) Exec(ctx context.Context, service string, command ...string) string {
+	tc.t.Helper()
+
+	out, err := tc.compose.Exec(ctx, service, command...)
+	if err != nil {
+		tc.t.Fatalf("compose library exec: %v", err)
+	}
+
+	return out
+}
+
 func (tc *TestingCompose) Env(service, name string) string {
 	tc.t.Helper()
 
