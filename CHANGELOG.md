@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/rudderlabs/compose-test/compare/v0.1.1...v0.1.2) (2023-06-23)
+
+
+### Miscellaneous
+
+* support for exec ([a520029](https://github.com/rudderlabs/compose-test/commit/a520029d94e156372d568b7197ccd2272a030fd1))
+
 ## [0.1.1](https://github.com/rudderlabs/compose-test/compare/v0.1.0...v0.1.1) (2023-05-15)
 
 
