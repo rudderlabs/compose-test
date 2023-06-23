@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/jackc/pgx/v5 v5.4.1
-	github.com/stretchr/testify v1.8.2
+	github.com/stretchr/testify v1.8.4
 )
 
 require (
