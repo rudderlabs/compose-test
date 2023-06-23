@@ -87,5 +87,9 @@ func sanityTest(t *testing.T, c *compose.Compose) {
 
 		_, err = conn.Exec(context.Background(), "CREATE TABLE test (id int)")
 		require.NoError(t, err)
+
+		output, err := c.Exec(context.Background(), "postgresDB", "psql", "-U", user, "-d", dbName, "-c", "INSERT INTO test (id) VALUES (1);")
+		require.NoError(t, err)
+		require.Contains(t, output, "INSERT 0 1")
 	})
 }

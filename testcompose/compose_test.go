@@ -32,9 +32,12 @@ func TestComposeTesting(t *testing.T) {
 		require.NotEqual(t, 5432, port)
 		require.NotEqual(t, 0, port)
 
+		user := c.Env("postgresDB", "POSTGRES_USER")
+		password := c.Env("postgresDB", "POSTGRES_PASSWORD")
+
 		dbURL := fmt.Sprintf("postgres://%s:%s@localhost:%d/postgres?sslmode=disable",
-			c.Env("postgresDB", "POSTGRES_USER"),
-			c.Env("postgresDB", "POSTGRES_PASSWORD"),
+			user,
+			password,
 			port,
 		)
 
@@ -44,5 +47,8 @@ func TestComposeTesting(t *testing.T) {
 
 		_, err = conn.Exec(context.Background(), "CREATE TABLE test (id int)")
 		require.NoError(t, err)
+
+		output := c.Exec(context.Background(), "postgresDB", "psql", "-U", user, "-d", "postgres", "-c", "INSERT INTO test (id) VALUES (1);")
+		require.Contains(t, output, "INSERT 0 1")
 	})
 }
