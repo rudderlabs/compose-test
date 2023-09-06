@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.1.3](https://github.com/rudderlabs/compose-test/compare/v0.1.2...v0.1.3) (2023-09-06)
+
+
+### Bug Fixes
+
+* unmarshalling info and config ([9776361](https://github.com/rudderlabs/compose-test/commit/97763617c3d951d1fee1ede95b20dd1ef43412e7))
+
+
+### Miscellaneous
+
+* improve error logging ([2a96bc2](https://github.com/rudderlabs/compose-test/commit/2a96bc2afcf0f91642d3f57ebe9dc6e33be7eaeb))
+
 ## [0.1.2](https://github.com/rudderlabs/compose-test/compare/v0.1.1...v0.1.2) (2023-06-23)
 
 
