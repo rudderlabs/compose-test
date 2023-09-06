@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	pgx "github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
 
 	"github.com/rudderlabs/compose-test/compose"
@@ -43,7 +43,9 @@ func TestComposeTesting(t *testing.T) {
 
 		conn, err := pgx.Connect(context.Background(), dbURL)
 		require.NoError(t, err)
-		defer conn.Close(context.Background())
+		defer func() {
+			_ = conn.Close(context.Background())
+		}()
 
 		_, err = conn.Exec(context.Background(), "CREATE TABLE test (id int)")
 		require.NoError(t, err)

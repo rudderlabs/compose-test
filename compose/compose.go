@@ -46,7 +46,7 @@ type containerConfig struct {
 	Labels map[string]string `json:"Labels"`
 }
 
-// Publishers":[{"URL":"","TargetPort":8123,"PublishedPort":0,"Protocol":"tcp"}
+// Publishers: {"URL":"","TargetPort":8123,"PublishedPort":0,"Protocol":"tcp"}
 type publisher struct {
 	Protocol      string
 	URL           string
@@ -73,7 +73,7 @@ func (c *Compose) Stop(ctx context.Context) error {
 	)
 	o, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("docker compose down: %w: %s", err, string(o))
+		return fmt.Errorf("docker compose down: output: %s, err: %w", string(o), err)
 	}
 
 	return nil
@@ -93,12 +93,12 @@ func (c *Compose) Start(ctx context.Context) error {
 
 	o, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("docker compose up: %w: %s", err, string(o))
+		return fmt.Errorf("docker compose up: output: %s, err: %w", string(o), err)
 	}
 
 	err = c.extractServiceInfo(ctx)
 	if err != nil {
-		return err
+		return fmt.Errorf("docker compose up: extract service info: %w", err)
 	}
 
 	return nil
@@ -134,7 +134,7 @@ func (c *Compose) Exec(ctx context.Context, service string, command ...string) (
 	cmd := exec.CommandContext(ctx, "docker", args...)
 	o, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", fmt.Errorf("docker exec: %w: %s", err, string(o))
+		return "", fmt.Errorf("docker exec: output: %s, err: %w", string(o), err)
 	}
 
 	return string(o), nil
@@ -216,7 +216,7 @@ func (c *Compose) config(ctx context.Context, id ...string) ([]containerConfig, 
 	cmd.Env = os.Environ() // TODO: remove this
 	o, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, fmt.Errorf("docker compose ps: %w: %s", err, o)
+		return nil, fmt.Errorf("docker inspect: output: %s, err: %w", string(o), err)
 	}
 
 	lines := strings.Split(strings.TrimSpace(string(o)), "\n")
@@ -225,7 +225,7 @@ func (c *Compose) config(ctx context.Context, id ...string) ([]containerConfig, 
 	for i, l := range lines {
 		err = json.Unmarshal([]byte(l), &configs[i])
 		if err != nil {
-			return nil, fmt.Errorf("unmarshal: %w", err)
+			return nil, fmt.Errorf("docker inspect: unmarshal: config: %s, err: %w", l, err)
 		}
 	}
 
@@ -242,13 +242,13 @@ func (c *Compose) ps(ctx context.Context) ([]containerInfo, error) {
 	)
 	o, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, fmt.Errorf("docker compose ps: %w", err)
+		return nil, fmt.Errorf("docker compose ps: output: %s, err: %w", string(o), err)
 	}
 
 	var info []containerInfo
 	err = json.Unmarshal(o, &info)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("docker compose ps: unmarshal: output: %s, err: %w", string(o), err)
 	}
 
 	return info, nil
