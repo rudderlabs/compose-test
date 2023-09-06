@@ -1,6 +1,7 @@
 package compose
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -219,16 +220,20 @@ func (c *Compose) config(ctx context.Context, id ...string) ([]containerConfig, 
 		return nil, fmt.Errorf("docker inspect: output: %s, err: %w", string(o), err)
 	}
 
-	lines := strings.Split(strings.TrimSpace(string(o)), "\n")
+	var configs []containerConfig
 
-	configs := make([]containerConfig, len(lines))
-	for i, l := range lines {
-		err = json.Unmarshal([]byte(l), &configs[i])
-		if err != nil {
-			return nil, fmt.Errorf("docker inspect: unmarshal: config: %s, err: %w", l, err)
-		}
+	if err = json.Unmarshal(o, &configs); err == nil {
+		return configs, nil
 	}
 
+	scanner := bufio.NewScanner(strings.NewReader(string(o)))
+	for scanner.Scan() {
+		var config containerConfig
+		if err = json.Unmarshal(scanner.Bytes(), &config); err != nil {
+			return nil, fmt.Errorf("docker inspect: unmarshal: config: %s, err: %w", scanner.Text(), err)
+		}
+		configs = append(configs, config)
+	}
 	return configs, nil
 }
 
@@ -245,11 +250,18 @@ func (c *Compose) ps(ctx context.Context) ([]containerInfo, error) {
 		return nil, fmt.Errorf("docker compose ps: output: %s, err: %w", string(o), err)
 	}
 
-	var info []containerInfo
-	err = json.Unmarshal(o, &info)
-	if err != nil {
-		return nil, fmt.Errorf("docker compose ps: unmarshal: output: %s, err: %w", string(o), err)
+	var infos []containerInfo
+	if err = json.Unmarshal(o, &infos); err == nil {
+		return infos, nil
 	}
 
-	return info, nil
+	scanner := bufio.NewScanner(strings.NewReader(string(o)))
+	for scanner.Scan() {
+		var info containerInfo
+		if err = json.Unmarshal(scanner.Bytes(), &info); err != nil {
+			return nil, fmt.Errorf("docker compose ps: unmarshal: info: %s, err: %w", scanner.Text(), err)
+		}
+		infos = append(infos, info)
+	}
+	return infos, nil
 }
