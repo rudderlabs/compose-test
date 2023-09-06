@@ -19,14 +19,6 @@ services:
     image: rudderlabs/develop-rudder-transformer:master
     ports:
       - "9090"
-  databricks-connector:
-    image: rudderstack/rudder-databricks-connector:v1.3.0
-    ports:
-      - "50051"
-    healthcheck:
-      test: /bin/grpc_health_probe -addr=localhost:50051
-      interval: 1s
-      retries: 25
   minio:
     image: minio/minio:latest
     ports:
@@ -39,27 +31,6 @@ services:
       test: curl --fail http://localhost:9000/minio/health/live || exit 1
       interval: 1s
       retries: 25
-  # clickhouse:
-  #   image: yandex/clickhouse-server:21-alpine
-  #   environment:
-  #     - CLICKHOUSE_DB=rudderdb
-  #     - CLICKHOUSE_PASSWORD=rudder-password
-  #     - CLICKHOUSE_USER=rudder
-  #   ports:
-  #     - "9000"
-  #   healthcheck:
-  #     test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
-  #     interval: 1s
-  #     retries: 25
-  # mssql:
-  #   image: rudderstack/azure-sql-edge:1.0.6
-  #   environment:
-  #     - ACCEPT_EULA=Y
-  #     - SA_PASSWORD=reallyStrongPwd123
-  #     - SA_DB=master
-  #     - SA_USER=SA
-  #   ports:
-  #     - "1433"
   zookeeper:
     image: zookeeper:3.5
     hostname: clickhouse-zookeeper
