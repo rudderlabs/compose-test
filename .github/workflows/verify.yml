@@ -12,11 +12,12 @@ jobs:
     name: Correct generated files
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          go-version: '1.19.x'
-      - uses: actions/cache@v2
+          go-version: '~1.21'
+          check-latest: true
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.cache/go-build
@@ -41,8 +42,13 @@ jobs:
     name: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          version: v1.52.2
+          go-version: '~1.21'
+          check-latest: true
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: v1.55.2
+          args: -v
