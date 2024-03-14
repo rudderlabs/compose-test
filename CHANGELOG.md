@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.4](https://github.com/rudderlabs/compose-test/compare/v0.1.3...v0.1.4) (2024-03-05)
+
+
+### Miscellaneous
+
+* upgrade dependencies ([bd27b29](https://github.com/rudderlabs/compose-test/commit/bd27b2999c8d6d007fad84dbd6e4398aa344bf6d))
+
 ## [0.1.3](https://github.com/rudderlabs/compose-test/compare/v0.1.2...v0.1.3) (2023-09-06)
 
 
