@@ -35,5 +35,5 @@ jobs:
     - run: go version
     - run: go mod download # Not required, used to segregate module download vs test times
     - run: make test
-    - uses: codecov/codecov-action@v4
+    - uses: codecov/codecov-action@v5
 
