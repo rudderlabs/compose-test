@@ -35,7 +35,8 @@ func TestComposeTesting(t *testing.T) {
 		user := c.Env("postgresDB", "POSTGRES_USER")
 		password := c.Env("postgresDB", "POSTGRES_PASSWORD")
 
-		dbURL := fmt.Sprintf("postgres://%s:%s@localhost:%d/postgres?sslmode=disable",
+		dbURL := fmt.Sprintf(
+			"postgres://%s:%s@localhost:%d/postgres?sslmode=disable",
 			user,
 			password,
 			port,

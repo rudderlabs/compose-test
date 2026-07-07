@@ -59,7 +59,8 @@ func New(file File) (*Compose, error) {
 }
 
 func (c *Compose) Stop(ctx context.Context) error {
-	cmd := exec.CommandContext(ctx, "docker",
+	cmd := exec.CommandContext(
+		ctx, "docker",
 		"compose",
 		"-p", c.name,
 
@@ -234,7 +235,8 @@ func (c *Compose) config(ctx context.Context, id ...string) ([]containerConfig, 
 }
 
 func (c *Compose) ps(ctx context.Context) ([]containerInfo, error) {
-	cmd := exec.CommandContext(ctx, "docker",
+	cmd := exec.CommandContext(
+		ctx, "docker",
 		"compose",
 		"-p", c.name,
 
