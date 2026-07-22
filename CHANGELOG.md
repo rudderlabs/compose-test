@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.6](https://github.com/rudderlabs/compose-test/compare/v0.1.5...v0.1.6) (2026-07-22)
+
+
+### Miscellaneous
+
+* **ci:** remove temporary release-please baseline anchor ([#67](https://github.com/rudderlabs/compose-test/issues/67)) ([38f65f5](https://github.com/rudderlabs/compose-test/commit/38f65f5bce3d12fc7edc78f4b1b1c54518bf9b5f))
+
 ## [0.1.5](https://github.com/rudderlabs/compose-test/compare/v0.1.4...v0.1.5) (2026-07-08)
 
 
